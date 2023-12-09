@@ -1,4 +1,4 @@
-export const DataExpense = [
+/* export const DataExpense = [
     {
       "id": "Food/drinks",
       "label": "Food/drinks",
@@ -35,4 +35,4 @@ export const DataExpense = [
       "value": 2000,
       "color": "hsl(359, 70%, 50%)"
     },
-  ]
+  ] */

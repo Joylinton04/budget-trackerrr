@@ -1,9 +1,11 @@
 import { ResponsivePie } from '@nivo/pie'
-import { DataExpense as data } from '../data';
 
-const PieChart = () => {
+
+
+const PieChart = ({data}) => {
+
   return (
-    <ResponsivePie
+        <ResponsivePie
         data={data}
         margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
         innerRadius={0.5}

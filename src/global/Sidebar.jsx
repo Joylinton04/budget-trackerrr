@@ -21,7 +21,7 @@ const Sidebar = () => {
             ? null
             : <div className='flex flex-col item-center gap-6 px-2'>
                <div className=' w-28 h-28 rounded-full bg-sky-500'><img src="" alt="" /></div>
-               <p className='text-2xl'>Adu (A.) Joy</p>
+               <p className='text-2xl whitespace-nowrap'>Adu (A.) Joy</p>
               </div>
             }
           <div className='mt-20 flex flex-col gap-6 w-full'>

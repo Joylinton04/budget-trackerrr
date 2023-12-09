@@ -5,29 +5,29 @@ import { useParams } from "react-router-dom";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { addToExpenses } from "../redux/budgetReducer";
+import { updateExpenseValue } from "../redux/piechartdata";
 
 const Expenses = () => {
+  const {id:budgetId} = useParams()
   const expenses = useSelector(state => state.budget.expenses)
+  const filteredExpenses = [...expenses].filter(expense => expense.budgetId == budgetId)
   const [isOpen, setIsOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('')
   const [account, setAccount] = useState('')
   const [description, setDescription] = useState('')
-  const {id:budgetId} = useParams()
+  const dispatch = useDispatch()
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-   /*    if (isOpen) {
-        setIsOpen(false);
-      } */
       if(isOpen && event.target.classList.contains('modal-content')) {
         setIsOpen(false);
       }
     };
-
     window.addEventListener('click', handleClickOutside);
-
     return () => {
       window.removeEventListener('click', handleClickOutside);
     };
@@ -35,12 +35,26 @@ const Expenses = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const id = expenses.length ? expenses[(expenses.length) - 1].id + 1 : 1
-
-    setExpenses(prev => {
-    return [...prev, {id:id,budgetId:budgetId,expense:amount,category:category,account:account,date: "25 december",description:description}]
-    })
+    const id = filteredExpenses.length ? filteredExpenses[(filteredExpenses.length) - 1].id + 1 : 1
+    dispatch(addToExpenses({
+      id:id,
+      budgetId:budgetId,
+      expense:amount,
+      category:category,
+      account:account,
+      date: "25 december",
+      description:description
+    }))
+    dispatch(updateExpenseValue({
+      category, amount
+    }))
     setIsOpen(prev => !prev)
+
+
+    setAmount('')
+    setAccount('')
+    setCategory('')
+    setDescription('')
   }
 
   const handleDelete = () => {
@@ -62,8 +76,8 @@ const Expenses = () => {
           </div>
           <div className="mt-4">
             <ul>
-              { expenses.length 
-              ? expenses?.reverse()?.map(expense => 
+              { filteredExpenses.length 
+              ? filteredExpenses?.reverse().map(expense => 
                 <li className="hover:-translate-y-2 hover:scale-[1.02] duration-150 rounded p-2 mb-3 relative" key={expense.id}>
                    <Accordion>
                     <AccordionSummary>
@@ -80,7 +94,7 @@ const Expenses = () => {
                                 <span>${expense.expense}</span>
                                 <span>{expense.date}</span>
                               </div>
-                              <div onClick={() => handleDelete()}>
+                              <div onClick={() => handleDelete()} className="relative">
                                 <MoreHorizIcon/>
                               </div>
                           </div>

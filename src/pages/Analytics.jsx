@@ -4,15 +4,22 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector,useDispatch } from "react-redux";
+import { addToBudget, removeBudget } from "../redux/budgetReducer";
+import { updateBudgetValue } from "../redux/piechartdata";
+import Delete from "../components/Delete";
+
 
 const Analytics = () => {
   const budget = useSelector(state => state.budget.budget)
-  
+  //const [budget, setBudget] = useState([])
   const [isOpen, setIsOpen] = useState(false)
+  const [isOpenDelete, setIsOpenDelete] = useState(false)
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('')
   const [account, setAccount] = useState('')
+  const [activeBudgetId, setActiveBudgetId] = useState(null);
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -28,14 +35,44 @@ const Analytics = () => {
     };
   }, [isOpen]);
 
+/*   useEffect(() => {
+      setBudget(() => {
+        return [...AllBudget].reverse()
+      })
+  }, []) */
+  //console.log(budget)
+  const toggleVisibility = (expenseId) => {
+    setActiveBudgetId(prevActiveId => (prevActiveId === expenseId ? null : expenseId))
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const id = budget.length ? budget[(budget.length) - 1].id + 1 : 1
+    dispatch(addToBudget({
+      id: id, 
+      budget:amount,
+      category:category,
+      account:account,
+      date: "25 december",
+    }))
 
-    setBudget(prev => {
-      return [...prev, {id: id, budget:amount,category:category,account:account,date: "25 december"}]
-    })
+    dispatch(updateBudgetValue({
+      category, amount
+    }))
     setIsOpen(prev => !prev)
+
+    setAmount('')
+    setAccount('')
+    setCategory('')
+  }
+
+  const handleDelete = (id) => {
+    dispatch(removeBudget(id))
+    setActiveBudgetId(null)
+  }
+
+  const handleCancel = () => {
+    setActiveBudgetId(null)
   }
 
 
@@ -47,10 +84,10 @@ const Analytics = () => {
             <div className="w-full mt-8">  
               <ul>
               { budget?.length 
-                ? budget.map(budget => 
+                ? [...budget]?.reverse()?.map(budget => 
                   <li className="border-b p-4 relative mb-8 hover:bg-slate-50 cursor-pointer" key={budget.id}>
                       <h1 className="font-semibold text-2xl mb-2 capitalize">{budget.category}</h1>
-                      <Link className="flex items-center justify-between" to="/budget/1/expense">
+                      <Link className="flex items-center justify-between" to={`/budget/${budget.id}/expense`}>
                         <div className="flex flex-col gap-2 items-center">
                           <div className="w-16 h-16 rounded-full bg-green-500"></div>
                           <span>{budget.date}</span>
@@ -58,14 +95,19 @@ const Analytics = () => {
                         <div className="h-3 w-[70%] bg-zinc-200 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2">
                           <span className="block w-1/2 bg-sky-500"></span>
                         </div>
-                        <div className="flex flex-col gap-2 items-center">
+                        <div className="flex flex-col gap-2 items-center -mt-8">
                           <h1 className="font-semibold text-lg">Budget: ${budget.budget}</h1>
-                          <div className="flex gap-2">
-                            <span className="border bg-lime-600 text-white rounded p-1"><DeleteIcon/></span>
-                            <span className="border bg-red-600 text-white rounded p-1"><EditIcon/></span>
-                          </div>
                         </div>
                       </Link>
+                        <div className="flex justify-end -mt-8">
+                            <div className="flex gap-2">
+                              <button className="border bg-lime-600 text-white rounded p-1" onClick={() => toggleVisibility(budget.id)}><DeleteIcon/></button>
+                              <button className="border bg-red-600 text-white rounded p-1"><EditIcon/></button>
+                              {activeBudgetId === budget.id 
+                              && <Delete id={budget.id} type="Budget" func={handleDelete} func2 = {handleCancel}/>
+                              }
+                            </div>
+                        </div>
                   </li>
                   )
                 : <p>No budget to display</p>
